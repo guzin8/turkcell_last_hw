@@ -46,17 +46,14 @@ UI.prototype.clearFormFields = function () {
   document.getElementById("posterUrl").value = "";
 };
 
-UI.prototype.deleteMovieFromListForDelete = function (target) { //???
+UI.prototype.deleteMovieFromList = function (target) {
   if (target.classList.contains("btn-danger")) {
     target.parentElement.parentElement.remove();
   }
+ else if (target.classList.contains("btn-primary")) {
+    target.parentElement.parentElement.remove();
+  }
 };
-
-UI.prototype.deleteMovieFromListForUpdate = function (target) { //???
-    if (target.classList.contains("btn-primary")) {
-      target.parentElement.parentElement.remove();
-    }
-  };
 
 UI.prototype.updateMovieForm = function (movie) {
   document.getElementById("movieName").value = movie.movieName;
@@ -66,9 +63,9 @@ UI.prototype.updateMovieForm = function (movie) {
   document.getElementById("posterUrl").value = movie.posterUrl;
 };
 
-// Film Constructor
+// Movie Constructor
 
-function Film(movieName, director, year, type, posterUrl) {
+function Movie(movieName, director, year, type, posterUrl) {
   this.movieName = movieName;
   this.director = director;
   this.year = year;
@@ -117,59 +114,52 @@ Storage.prototype.deleteMovieFromStorage = function (index) {
 const ui = new UI();
 const storage = new Storage();
 
-// Form gönderildiğinde çalışacak fonksiyon
 function addMovie(event) {
   event.preventDefault(); // Formun sayfayı yenilemesini engelliyor
 
-  // Formdaki verileri al
+
   const movieName = document.getElementById("movieName").value;
   const director = document.getElementById("director").value;
   const year = document.getElementById("year").value;
   const type = document.getElementById("type").value;
   const posterUrl = document.getElementById("posterUrl").value;
 
-  // Yeni filmi oluştur
-  const movie = new Film(movieName, director, year, type, posterUrl);
+  const movie = new Movie(movieName, director, year, type, posterUrl);
 
-  // UI nesnesi üzerinden filmi tabloya ekle
   ui.addMovieToList(movie);
 
-  // Storage nesnesi üzerinden filmi localStorage'e ekle
   storage.addMovieToStorage(movie);
 
-  // Formu temizle
   ui.clearFormFields();
 }
 
-// Formu submit eventine bağla
 document.getElementById("movieForm").addEventListener("submit", addMovie);
-// Silme ve güncelleme butonlarına click eventi ekleme
+
 document.getElementById("movieTable").addEventListener("click", function (event) {
     // Silme butonuna tıklandığında
   if (event.target.classList.contains("btn-danger")) {
-    const rowIndex = event.target.parentElement.parentElement.rowIndex - 1;
+    const rowIndex = event.target.parentElement.parentElement.rowIndex-1;
 
-    // UI nesnesi üzerinden filmi tablodan sil
-    ui.deleteMovieFromListForDelete(event.target);
+    ui.deleteMovieFromList(event.target);
 
-    // Storage nesnesi üzerinden filmi localStorage'dan sil
     storage.deleteMovieFromStorage(rowIndex);
   }
      // Güncelleme butonuna tıklandığında
      if (event.target.classList.contains("btn-primary")) {
-        const rowIndex = event.target.parentElement.parentElement.rowIndex - 1;
+        const rowIndex = event.target.parentElement.parentElement.rowIndex-1;
        
         const movies = storage.getMoviesFromStorage();
         const movie = movies[rowIndex];
         
         ui.updateMovieForm(movie);
-        ui.deleteMovieFromListForUpdate(event.target);
+        ui.deleteMovieFromList(event.target);
         storage.deleteMovieFromStorage(rowIndex);
       } 
   
   event.preventDefault();
 });
-// Sayfa yüklendiğinde localStorage'den verileri al ve tabloya ekle
+
+// Sayfa yüklendiğinde localStorage'den verileri alma ve tabloya ekleme
 document.addEventListener("DOMContentLoaded", function () {
   const movies = storage.getMoviesFromStorage();
 
